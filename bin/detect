@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo "heroku-icu-buildpack" && exit 0

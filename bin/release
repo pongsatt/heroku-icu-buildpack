@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# No default addons or procfile
+echo "--- {}"
