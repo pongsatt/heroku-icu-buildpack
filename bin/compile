@@ -1,1 +1,46 @@
 #!/bin/bash
+
+ICU_VERSION="57.1"
+
+compile="/app/icu"
+build="$1/icu"
+cache_container="$2/icu"
+cache="$cache_container/$ICU_VERSION"
+buildpack=`cd $(dirname $0); cd ..; pwd`
+
+icu_url="http://download.icu-project.org/files/icu4c/${ICU_VERSION}/icu4c-${ICU_VERSION//./_}-src.tgz"
+
+if [[ -d "$cache" ]]; then
+  echo "Using cached build of ICU"
+  cp -R $cache $build
+  cp -R $cache $compile
+else
+  echo "Downloading ICU $ICU_VERSION"
+
+  curl -L $icu_url | tar xz
+
+  echo "Building ICU $ICU_VERSION"
+
+  pushd icu/source
+
+  ./runConfigureICU Linux --prefix=$compile
+  make
+  make install
+
+  popd
+
+  echo "Caching build"
+
+  mkdir -p $cache_container
+
+  rm -rf "$cache_container/*"
+
+  cp -R $compile $cache
+  cp -R $compile $build
+fi
+
+# Tell Charlock Holmes where to find ICU.
+export BUNDLE_BUILD__CHARLOCK_HOLMES="--with-icu-dir=$compile"
+
+# Make sure we export the relevant environment variables for later buildpacks
+export | grep -E -e '(BUNDLE_BUILD__CHARLOCK_HOLMES)='  > "$buildpack/export"
