@@ -1,46 +1,55 @@
 #!/bin/bash
 
-ICU_VERSION="57.1"
+set -x
+set -e
 
-compile="/app/icu"
-build="$1/icu"
-cache_container="$2/icu"
-cache="$cache_container/$ICU_VERSION"
-buildpack=`cd $(dirname $0); cd ..; pwd`
+ICU_VERSION="58.2"
+
+BUILD_DIR=$1/icu/$ICU_VERSION
+CACHE_DIR=$2/icu/$ICU_VERSION
+INSTALL_DIR="/app/icu/$ICU_VERSION"
+BIN_DIR=$(cd $(dirname $0); pwd) # absolute path
+EXPORT_PATH="$BIN_DIR/../export"
+PKGCONFIG_DIR=$INSTALL_DIR/lib/pkgconfig
 
 icu_url="http://download.icu-project.org/files/icu4c/${ICU_VERSION}/icu4c-${ICU_VERSION//./_}-src.tgz"
 
-if [[ -d "$cache" ]]; then
-  echo "Using cached build of ICU"
-  cp -R $cache $build
-  cp -R $cache $compile
+if [[ -d "$CACHE_DIR" ]]; then
+    echo "-----> Using cached build of ICU in $CACHE_DIR"
+    rm -rf "$BUILD_DIR"
+    mkdir -p $BUILD_DIR
+    cp -R $CACHE_DIR/* $BUILD_DIR
+
+    rm -rf "$INSTALL_DIR"
+    mkdir -p $INSTALL_DIR
+    cp -R $CACHE_DIR/* $INSTALL_DIR
 else
-  echo "Downloading ICU $ICU_VERSION"
+    echo "-----> Downloading ICU $ICU_VERSION"
+    curl -L $icu_url | tar xz
 
-  curl -L $icu_url | tar xz
+    echo "-----> Building and installing ICU $ICU_VERSION into $INSTALL_DIR"
+    pushd icu/source
+    ./runConfigureICU Linux --prefix=$INSTALL_DIR
+    make
+    make install
+    popd
 
-  echo "Building ICU $ICU_VERSION"
+    echo "-----> Caching build in $CACHE_DIR"
+    rm -rf "$CACHE_DIR"
+    mkdir -p $CACHE_DIR
+    cp -R $INSTALL_DIR/* $CACHE_DIR
 
-  pushd icu/source
-
-  ./runConfigureICU Linux --prefix=$compile
-  make
-  make install
-
-  popd
-
-  echo "Caching build"
-
-  mkdir -p $cache_container
-
-  rm -rf "$cache_container/*"
-
-  cp -R $compile $cache
-  cp -R $compile $build
+    echo "-----> Storing build in $BUILD_DIR"
+    rm -rf "$BUILD_DIR"
+    mkdir -p $BUILD_DIR
+    cp -R $INSTALL_DIR/* $BUILD_DIR
 fi
 
-# Tell Charlock Holmes where to find ICU.
-export BUNDLE_BUILD__CHARLOCK_HOLMES="--with-icu-dir=$compile"
+echo "-----> Adding $PKGCONFIG_DIR to pkg-config search path"
+export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PKGCONFIG_DIR
+export | grep -E -e '(PKG_CONFIG_PATH)='  > $EXPORT_PATH
 
-# Make sure we export the relevant environment variables for later buildpacks
-export | grep -E -e '(BUNDLE_BUILD__CHARLOCK_HOLMES)='  > "$buildpack/export"
+# Debug this buildpack
+export
+cat $EXPORT_PATH
+ls $INSTALL_DIR/lib/pkgconfig
