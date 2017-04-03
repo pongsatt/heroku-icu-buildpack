@@ -55,6 +55,7 @@ export PYICU_INCLUDES=$INSTALL_DIR/include
 export PYICU_LIBRARIES=$INSTALL_DIR/lib
 
 #give environment to later buildpacks
+LP_DIR=`cd $(dirname $0); cd ..; pwd`
 export | grep -E -e ' (PATH|PYICU_INCLUDES|PYICU_LIBRARIES)='  > "$LP_DIR/export"
 
 # Debug this buildpack
