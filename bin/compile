@@ -49,6 +49,11 @@ echo "-----> Adding $PKGCONFIG_DIR to pkg-config search path"
 export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$PKGCONFIG_DIR
 export | grep -E -e '(PKG_CONFIG_PATH)='  > $EXPORT_PATH
 
+echo "-----> Export parameter for pyicu"
+export PATH=$INSTALL_DIR/bin:$PATH
+export PYICU_INCLUDES=$INSTALL_DIR/include
+export PYICU_LIBRARIES=$INSTALL_DIR/lib
+
 # Debug this buildpack
 export
 cat $EXPORT_PATH
