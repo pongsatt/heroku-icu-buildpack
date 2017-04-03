@@ -49,9 +49,10 @@ echo "-----> Export parameter for pyicu"
 export PATH=$INSTALL_DIR/bin:$PATH
 export PYICU_INCLUDES=$INSTALL_DIR/include
 export PYICU_LIBRARIES=$INSTALL_DIR/lib
+export LANG=en_US.UTF-8
 
 #give environment to later buildpacks
-export | grep -E -e ' (PATH|PYICU_INCLUDES|PYICU_LIBRARIES)='  > $EXPORT_PATH
+export | grep -E -e ' (PATH|PYICU_INCLUDES|PYICU_LIBRARIES|LANG)='  > $EXPORT_PATH
 
 # Debug this buildpack
 export
