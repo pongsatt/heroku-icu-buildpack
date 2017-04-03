@@ -54,6 +54,9 @@ export PATH=$INSTALL_DIR/bin:$PATH
 export PYICU_INCLUDES=$INSTALL_DIR/include
 export PYICU_LIBRARIES=$INSTALL_DIR/lib
 
+#give environment to later buildpacks
+export | grep -E -e ' (PATH|PYICU_INCLUDES|PYICU_LIBRARIES)='  > "$LP_DIR/export"
+
 # Debug this buildpack
 export
 cat $EXPORT_PATH
