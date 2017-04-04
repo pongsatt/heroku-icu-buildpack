@@ -53,7 +53,7 @@ export PYICU_LIBRARIES=$INSTALL_DIR/lib
 export LANG=en_US.UTF-8
 
 #give environment to later buildpacks
-export | grep -E -e ' (PATH|PYICU_INCLUDES|LD_LIBRARY_PATH|PYICU_LIBRARIES|LANG)='  > $EXPORT_PATH
+export | grep -E -e ' (PATH|PYICU_INCLUDES|PYICU_LIBRARIES|LANG)='  > $EXPORT_PATH
 
 # Debug this buildpack
 export
