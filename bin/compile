@@ -3,7 +3,7 @@
 set -x
 set -e
 
-ICU_VERSION="58.2"
+ICU_VERSION="52.1"
 
 BUILD_DIR=$1/icu/$ICU_VERSION
 CACHE_DIR=$2/icu/$ICU_VERSION
